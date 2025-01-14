@@ -1,0 +1,192 @@
+<!--
+Thanks to Caleb Cooper for refactoring the source code and implementing show code
+file renaming. 
+
+Want to mod texCODE? I'll make a tutorial at some point.
+🄯2023 Matthew_inc.
+VERSION: v1.0.1 RETAIL VER
+CHANGELOG: Finallised systems and implemented appView mode.
+           This is the first full release. EXPECT MISSING FEATURES!
+    [Caleb C]:
+    [04/17/2024]
+        - Added indentation to the source file
+        - Refactored buttons to have single function calls
+            - Added the 'newEditor' and 'evaluateCode' functions
+        - Removed redundant lines of code
+        - 'appMode' now toggles between showing and hiding code
+        - 'makeEruda' will no longer create duplicate buttons
+        - Reordered buttons to group similar opterations together 
+
+LICENSE: Matthew_inc. OSS License (see LICENSE.html)
+-->
+<html style="overflow: hidden;">
+    <head>
+        <title>MI texCODE</title>
+    </head>
+    <body style="background: lightgray;overflow: hidden;">
+        <menubar style="background:gray;">
+            <input type="text" id="fileName" placeholder="File name/path">
+            <button onclick="download()">&#10515; Download</button>
+        </menubar>
+        <br>
+        <menubar style="background: gray;">
+            <button onclick="newEditor()">&boxbox; New Editor</button>
+            <button onclick="makeEruda()">&#9096; Console</button>
+            <button onclick="appMode()" id="appModeButton">&#9776; Hide Code</button>
+            <button onclick="evaluateCode()">&#9658; Evaluate</button>
+            <button onclick="runCode()">&#8811; Preview HTML</button>
+        </menubar>
+        <br height="1px">
+        <style>
+            *:focus{
+                outline: none;
+            }
+            textarea {
+                resize: none;
+                width: 49%;
+                height: 90%;
+                margin: none;
+                display:inline-block;  
+                white-space: pre;
+                overflow-wrap: normal;
+                overflow-x: scroll;
+            }
+            div {
+                overflow: scroll;
+                width: 49%;
+                height: 90%;
+                margin: none;
+                background-color:white;
+                display:inline-block;
+                outline: solid 1px DimGray;
+                size: fixed;
+            }
+        </style>
+        <textarea id="code" spellcheck="false"></textarea>
+        <div id="view"></div>
+        <script id="image-library">
+            colours = [0,4,3,7,2,6,5,1,9,8]
+            
+            function rgb_colour(r,g,b,s){
+                return colours[(s<<3)+(r<<2)+(g<<1)+b];
+            }
+            
+            function special_colour(id){
+                return (1<<3)+id;
+            }
+            
+            class colour {
+                s = false
+                r = false
+                g = false
+                b = false
+                constructor(r,g,b,s=false){
+                    this.r = r
+                    this.g = g
+                    this.b = b
+                    this.s = s
+                }
+                get_id(){
+                    return rgb_colour(this.r,this.g,this.b,this.s)
+                }
+            }
+            
+            colour_test = new colour(0,1,0).get_id()
+            
+            class image {
+                grid = [...Array(16).keys()].map(x => [...Array(16).keys()].map(y => new colour(1,1,1)))
+                set_rgb(x,y,r,g,b,s=0){
+                    this.grid[x][y].r=r
+                    this.grid[x][y].g=g
+                    this.grid[x][y].b=b
+                    this.grid[x][y].s=s
+                }
+                fill(r,g,b,s=0){
+                    this.grid = [...Array(16).keys()].map(x => [...Array(16).keys()].map(y => new colour(r,g,b,s)))
+                }
+                render(){
+                    return "<img src=\"https://verumignis.com/bitmapgen/"+this.grid.map(row => row.map(colour => colour.get_id()).join('')).join('-')+"\">"
+                }
+            }
+            
+            picture = new image()
+            picture.fill(0,0,1)
+            picture.set_rgb(8,8,0,1,0)
+
+            setScreen(picture.render())
+        </script>
+        <script>
+            var erudaVisible = false;
+            var inAppMode = false;
+
+            function newEditor() {
+                open('./texCode.html','','width:500')
+            }
+
+
+            function runCode() {
+                setScreen(getCode())
+            }
+
+
+            function evaluateCode() {
+                eval(document.getElementById('code').value)
+            }
+
+
+            function appMode() {
+                if (inAppMode) {
+                    // Exit App Mode
+                    document.getElementById('code').style='display:inline-block';
+                    document.getElementById('view').style='width:50%';
+                    document.getElementById("appModeButton").innerHTML = "&#9776;Hide Code"
+                    inAppMode = false;
+                } else {
+                    document.getElementById('code').style='display:none';
+                    document.getElementById('view').style='width:98%';
+                    document.getElementById("appModeButton").innerHTML = "&#9776;Show Code"
+                    inAppMode = true;
+                }
+            }
+
+
+            function makeEruda() {
+                // Makes it so the Eruda button isn't spawned in multiple times
+                if (erudaVisible) {return;}
+                erudaVisible = true;
+
+                var script = document.createElement('script');
+                script.src='https://cdn.jsdelivr.net/npm/eruda';
+                document.body.appendChild(script); eruda.init();
+            }
+
+
+            function download() {
+                var text = document.getElementById("code").value;
+                var path = document.getElementById("fileName").value;
+                var blob = new Blob([text], { type: "text/plain"});
+                var anchor = document.createElement("a");
+                anchor.download = path;
+                anchor.href = window.URL.createObjectURL(blob);
+                anchor.target ="_blank";
+                anchor.style.display = "none";
+                document.body.appendChild(anchor);
+                anchor.click();
+                document.body.removeChild(anchor);
+            }
+
+
+            function setScreen(text){
+                document.getElementById("view").innerHTML = text;
+            }
+
+
+            function getCode(){
+                return document.getElementById("code").value;
+            }
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+        <div id="eruda" style="all: initial;"></div>
+        <div class="__chobitsu-hide__" style="all: initial;"></div>
+    </body>
+</html>
