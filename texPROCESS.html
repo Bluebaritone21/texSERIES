@@ -59,7 +59,7 @@ function downloadRich() {
                 document.body.removeChild(anchor);
             }
 </script>
-
+<body style="overflow: hidden;"></body>
 <input type="text" id="download-name" placeholder="Document Name" value="Untitled">
 <button onclick="downloadRich()">&#x2b73;</button>
 <input type="file" id="fileInput" onchange="readFile(event, this.value)">
@@ -172,3 +172,4 @@ div:focus{
     outline:none;
 }
 </style>
+</body>
